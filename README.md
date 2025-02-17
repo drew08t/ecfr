@@ -22,7 +22,7 @@ Activate the virtual environment.
 
 Inside of the virtual environment, install python dependencies:
 
-### `pip install flask python-dotenv iapws`
+### `pip install flask python-dotenv iapws setuptools urllib3`
 
 Once complete, deactive the virtual environment.
 
