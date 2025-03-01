@@ -28,6 +28,14 @@ Once complete, deactive the virtual environment.
 
 ### `deactivate`
 
+From the `api` directory, download the ecfr data:
+
+### `python3 download.py`
+
+From the `api` directory, analyze the ecfr data:
+
+### `python3 analysis.py`
+
 ### `cd ..`
 
 ## Running

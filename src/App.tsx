@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { agency, cfr_reference } from "./types";
+import { agency, analysis } from "./types";
 
 function App() {
   const [currentTime, setCurrentTime] = useState(0);
   const [agencies, setAgencies] = useState<agency[]>([]);
+  const [analysis, setAnalysis] = useState<analysis[]>([]);
   useEffect(() => {
     fetch("/time")
       .then((res) => res.json())
@@ -14,17 +15,22 @@ function App() {
     fetch("/agencies")
       .then((res) => res.json())
       .then((data) => {
-        setAgencies(data.agencies);
+        setAgencies(data);
+      });
+    fetch("/analysis")
+      .then((res) => res.json())
+      .then((data) => {
+        setAnalysis(data);
       });
   }, []);
 
   useEffect(() => {
     console.log(agencies);
-    let agencyCount = 0;
-    const totalAgenciesToTest = 5;
+    console.log(analysis);
+
     // agencies.map((agency) => {
     //   agencyCount += 1;
-    //   // examples to check approach from doge.gov
+    //   // examples to check
     //   // title 1, chapter 3: Administrative Conference of the United States - 12.36k words
     //   // title 1, chapter IV, part 425: President's Commission on White House Fellowships - 1.43k words
     //   // TODO querying on chapter doesn't appear to be working!
@@ -52,7 +58,7 @@ function App() {
     //     }
     //   });
     // });
-  }, [agencies]);
+  }, [agencies, analysis]);
 
   return (
     <div className="App">

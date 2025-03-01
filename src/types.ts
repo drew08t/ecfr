@@ -1,17 +1,18 @@
 export interface agency {
-  cfr_references: cfr_reference[];
-  children?: agency[];
+  slug: string;
   display_name: string;
   name: string;
   short_name: string;
-  slug: string;
   sortable_name: string;
-}
-
-export interface cfr_reference {
   title: number;
   subtitle?: string;
   chapter?: string;
   subchapter?: string;
   part?: string;
+}
+
+export interface analysis {
+  slug: string;
+  year: number;
+  word_count?: number;
 }
