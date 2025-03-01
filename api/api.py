@@ -84,3 +84,38 @@ def get_words():
             except ApiException as e2:
                 print("Exception when calling VersionerServiceApi->api_versioner_v1_full_date_title_title_xml_get: %s\n" % e2)
         print("Exception when calling VersionerServiceApi->api_versioner_v1_full_date_title_title_xml_get: %s\n" % e)
+
+def get_title(date, title, subtitle=None, chapter=None, subchapter=None, part=None, subpart=None, section=None, appendix=None):
+    args = {}
+    if date:
+        args['_date'] = date
+    if title:
+        args['title'] = title
+    if subtitle:
+        args['subtitle'] = subtitle
+    if chapter:
+        args['chapter'] = chapter
+    if subchapter:
+        args['subchapter'] = subchapter
+    if part:
+        args['part'] = part
+    if subpart:
+        args['subpart'] = subpart
+    if section:
+        args['section'] = section
+    if appendix:
+        args['appendix'] = appendix
+
+    print(args)
+
+    try:
+        versioner_instance = swagger_client.VersionerServiceApi(swagger_client.ApiClient(configuration))
+        return versioner_instance.api_versioner_v1_full_date_title_title_xml_get(**args)
+    except ApiException as e:
+        if e.status == 429:
+            try:
+                time.sleep(1)
+                return versioner_instance.api_versioner_v1_full_date_title_title_xml_get(**args)
+            except ApiException as e2:
+                print("Exception when calling VersionerServiceApi->api_versioner_v1_full_date_title_title_xml_get: %s\n" % e2)
+        print("Exception when calling VersionerServiceApi->api_versioner_v1_full_date_title_title_xml_get: %s\n" % e)
