@@ -2,6 +2,7 @@ export interface agency {
   cfr_references: cfr_reference[];
   children?: agency[];
   display_name: string;
+  name: string;
   short_name: string;
   slug: string;
   sortable_name: string;
