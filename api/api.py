@@ -82,7 +82,6 @@ def get_analysis_db():
         columns = [desc[0] for desc in cursor.description]
         # Convert to list of dictionaries
         results = [dict(zip(columns, row)) for row in rows]
-        print(results)
         return results
 
     except sqlite3.Error as e:
@@ -132,8 +131,6 @@ def get_words():
     if appendix:
         args['appendix'] = appendix
 
-    print(args)
-
     try:
         time.sleep(1)
         versioner_instance = swagger_client.VersionerServiceApi(swagger_client.ApiClient(configuration))
@@ -177,8 +174,6 @@ def get_title(date, title, subtitle=None, chapter=None, subchapter=None, part=No
     # For some reason including a blank subtitle causes the API to not timeout and run much faster, go figure...
     args['subtitle'] = ''
 
-    print(args)
-
     try:
         versioner_instance = swagger_client.VersionerServiceApi(swagger_client.ApiClient(configuration))
         return versioner_instance.api_versioner_v1_full_date_title_title_xml_get(**args)
@@ -199,8 +194,6 @@ def get_title_json(date, title):
         args['_date'] = date
     if title:
         args['title'] = title
-
-    print(args)
 
     try:
         versioner_instance = swagger_client.VersionerServiceApi(swagger_client.ApiClient(configuration))
