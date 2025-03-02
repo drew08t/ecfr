@@ -53,7 +53,7 @@ function App() {
       };
       // Look for existing slug
       const matchingSlugIndex = years[matchingYearIndex].slugs.findIndex(
-        (item) => item.slug === row.slug
+        (item) => item.slug === slug.slug
       );
       if (matchingSlugIndex > -1) {
         years[matchingYearIndex].slugs[matchingSlugIndex].totalWords +=
@@ -61,6 +61,11 @@ function App() {
       } else {
         years[matchingYearIndex].slugs.push(slug);
       }
+    });
+
+    // Sort each slug
+    years.map((year) => {
+      year.slugs = year.slugs.sort((a, b) => a.totalWords - b.totalWords);
     });
 
     console.log(years);
