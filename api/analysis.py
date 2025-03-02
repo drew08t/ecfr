@@ -37,12 +37,14 @@ def analysis():
                     if not os.path.exists(filename):
                         newYear = year
                         foundOne = False
+                        # TODO make this more robust - currently this is a fall back for missing data
                         while newYear > yearMin and foundOne == False:
                             newYear -= 1
                             filename = f'./cache/{newYear}-12-31_{title}'
                             if os.path.exists(filename):
                                 print(filename)
                                 foundOne = True
+                        # TODO fix timeout issues as some titles required recent data to be used and this will skew the history
                         if not foundOne:
                             filename = f'./cache/{recentDate}_{title}'
                             print(filename)
