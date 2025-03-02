@@ -60,6 +60,8 @@ You may also see any lint errors in the console.
 
 ## Goals
 
+![screencap](./src/img/screencap.png)
+
 - Primary
   - Download Federal Regulations from https://www.ecfr.gov/
   - Analyze for word count per agency and historical changes over time
