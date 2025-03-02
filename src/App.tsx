@@ -8,6 +8,7 @@ function App() {
   const [analysis, setAnalysis] = useState<analysis[]>([]);
   const [plotYears, setPlotYears] = useState<string[]>([]);
   const [plotData, setPlotData] = useState<chartData[]>([]);
+  const [legend, setLegend] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     fetch("/agencies-unique")
@@ -26,6 +27,7 @@ function App() {
     const years: year[] = [];
     const uniqueSlugs: string[] = [];
     const yearStrings: string[] = [];
+    const legendNames: { [key: string]: string } = {};
     // Pre-populate years
     analysis.map((row) => {
       const year = row.year;
@@ -78,10 +80,15 @@ function App() {
         const slugValue = yearData?.slugs.find((s) => s.slug === slug);
         return slugValue?.totalWords ?? 0;
       });
+      const agencyData =
+        agencies.find((agency) => agency.slug === slug) ?? agencies[0];
       chartData.push({ name: slug, values });
+      // Get unique legend names for each slug
+      legendNames[slug] = agencyData.short_name ?? agencyData.display_name;
     });
     setPlotYears(yearStrings);
     setPlotData(chartData);
+    setLegend(legendNames);
   }, [agencies, analysis]);
 
   return (
@@ -90,6 +97,7 @@ function App() {
         years={plotYears}
         data={plotData}
         title="My Custom Data"
+        legendNames={legend}
       />
     </div>
   );

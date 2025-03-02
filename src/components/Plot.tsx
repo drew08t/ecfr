@@ -11,19 +11,22 @@ interface StackedBarChartProps {
   years: string[];
   data: CategoryData[];
   title?: string;
+  legendNames?: { [key: string]: string }; // Mapping of original names to legend names
 }
 
 interface BarChartData {
   x: string[];
   y: number[];
-  name: string;
+  name: string; // This will hold the legend name
   type: "bar";
+  text?: string;
 }
 
 const StackedBarChart: React.FC<StackedBarChartProps> = ({
   years,
   data,
   title = "Yearly Data by Category",
+  legendNames = {}, // Default to empty object
 }) => {
   const getSortedPlotData = (): BarChartData[] => {
     const yearData: { value: number; name: string }[][] = years.map(() => []);
@@ -32,7 +35,7 @@ const StackedBarChart: React.FC<StackedBarChartProps> = ({
       category.values.forEach((value, yearIndex) => {
         yearData[yearIndex].push({
           value,
-          name: category.name,
+          name: category.name, // Keep original name for sorting
         });
       });
     });
@@ -49,8 +52,9 @@ const StackedBarChart: React.FC<StackedBarChartProps> = ({
           sortedDataMap[item.name] = {
             x: [],
             y: [],
-            name: item.name,
+            name: legendNames[item.name] || item.name, // Use legend name if provided, otherwise original
             type: "bar",
+            text: item.name,
           };
         }
         sortedDataMap[item.name].x.push(years[yearIndex]);
@@ -73,10 +77,34 @@ const StackedBarChart: React.FC<StackedBarChartProps> = ({
       title: "Values",
     },
     legend: {
-      x: 1,
-      y: 1,
+      font: {
+        size: 10, // Smaller font size
+      },
+      x: 1, // Position to the right
+      y: 1, // Align to the top
+      xanchor: "left",
+      yanchor: "top",
+      orientation: "v", // Vertical orientation
+      traceorder: "normal",
+      itemwidth: 100, // Fixed width for each legend item (in pixels)
+      itemsizing: "constant", // Uniform sizing
+      bgcolor: "rgba(255, 255, 255, 0.8)", // Background for readability
+      bordercolor: "gray",
+      borderwidth: 1,
+    },
+    margin: {
+      r: 120, // Increase right margin to accommodate legend
     },
     autosize: true,
+    hoverlabel: {
+      font: {
+        size: 16,
+      },
+      namelength: -1,
+      bgcolor: "rgba(0, 0, 0, 0.8)",
+      bordercolor: "rgba(255, 255, 255, 0.5)",
+      align: "left",
+    },
   };
 
   const config: Partial<Plotly.Config> = {
