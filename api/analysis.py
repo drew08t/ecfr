@@ -34,20 +34,20 @@ def analysis():
                 print(title, searchAttributes)
                 try:
                     filename = f'./cache/{year}-12-31_{title}'
-                    if not os.path.exists(filename):
-                        newYear = year
-                        foundOne = False
-                        # TODO make this more robust - currently this is a fall back for missing data
-                        while newYear > yearMin and foundOne == False:
-                            newYear -= 1
-                            filename = f'./cache/{newYear}-12-31_{title}'
-                            if os.path.exists(filename):
-                                print(filename)
-                                foundOne = True
-                        # TODO fix timeout issues as some titles required recent data to be used and this will skew the history
-                        if not foundOne:
-                            filename = f'./cache/{recentDate}_{title}'
-                            print(filename)
+                    # if not os.path.exists(filename):
+                    #     newYear = year
+                    #     foundOne = False
+                    #     # TODO make this more robust - currently this is a fall back for missing data
+                    #     while newYear > yearMin and foundOne == False:
+                    #         newYear -= 1
+                    #         filename = f'./cache/{newYear}-12-31_{title}'
+                    #         if os.path.exists(filename):
+                    #             print(filename)
+                    #             foundOne = True
+                    #     # TODO fix timeout issues as some titles required recent data to be used and this will skew the history
+                    #     if not foundOne:
+                    #         filename = f'./cache/{recentDate}_{title}'
+                    #         print(filename)
                     wordCount = count_words_in_xml(parse_xml_by_nested_attributes(filename,searchAttributes,None,True))
                     insertAnalysisString = "INSERT or REPLACE INTO analysis (slug, instance, year, word_count) VALUES (?,?,?,?)"
                     cursor.execute(insertAnalysisString, (slug, instance, year, wordCount))

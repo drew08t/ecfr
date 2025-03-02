@@ -174,6 +174,9 @@ def get_title(date, title, subtitle=None, chapter=None, subchapter=None, part=No
     if appendix:
         args['appendix'] = appendix
 
+    # For some reason including a blank subtitle causes the API to not timeout and run much faster, go figure...
+    args['subtitle'] = ''
+
     print(args)
 
     try:
