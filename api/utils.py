@@ -32,22 +32,6 @@ def count_words_in_xml(xml_source):
     words = re.findall(r'\b\w+\b', all_text.lower())
     return len(words)
 
-def flatten_json(json_dict, parent_key='', separator='_'):
-    items = []
-    for key, value in json_dict.items():
-        new_key = f"{key}" if parent_key else key
-        
-        if isinstance(value, dict):
-            items.extend(flatten_json(value, new_key, separator).items())
-        elif isinstance(value, list):
-            for i, v in enumerate(value):
-                if isinstance(v, dict):
-                    items.extend(flatten_json(v, f"{new_key}{separator}{i}", separator).items())
-                else:
-                    items.append((f"{new_key}{separator}{i}", v))
-        else:
-            items.append((new_key, value))
-    return dict(items)
 
 def parse_xml_by_div_raw_xml(
     xml_input: str,
@@ -125,6 +109,8 @@ def parse_xml_by_div_raw_xml(
 
 
 def parse_xml_by_nested_attributes(
+        
+
     xml_input: str,
     attribute_sets: List[Dict[str, str]],
     div_number: Optional[int] = None,
@@ -166,4 +152,3 @@ def parse_xml_by_nested_attributes(
         is_file_path = False  # Subsequent iterations use string input
     
     return result
-

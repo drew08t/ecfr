@@ -26,7 +26,28 @@ def before_first_request_func():
 def get_current_time():
     return {'time': time.time()}
 
-@app.route('/agencies')
+@app.route('/agencies-unique')
+def get_agencies_db():
+    try:
+        conn = sqlite3.connect(dbName)
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM agency where instance = 1")
+    
+        # Fetch all rows
+        rows = cursor.fetchall()
+        # Get column names from cursor description
+        columns = [desc[0] for desc in cursor.description]
+        # Convert to list of dictionaries
+        results = [dict(zip(columns, row)) for row in rows]
+        return results
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    
+    finally:
+        if conn:
+            conn.close()
+
 def get_agencies_db():
     try:
         conn = sqlite3.connect(dbName)

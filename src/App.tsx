@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { agency, analysis } from "./types";
+import { agency, analysis, year } from "./types";
 
 function App() {
   const [currentTime, setCurrentTime] = useState(0);
@@ -12,7 +12,7 @@ function App() {
       .then((data) => {
         setCurrentTime(data.time);
       });
-    fetch("/agencies")
+    fetch("/agencies-unique")
       .then((res) => res.json())
       .then((data) => {
         setAgencies(data);
@@ -25,39 +25,45 @@ function App() {
   }, []);
 
   useEffect(() => {
-    console.log(agencies);
-    console.log(analysis);
+    const years: year[] = [];
+    // Pre-populate years
+    analysis.map((row) => {
+      const year = row.year;
+      const matchingYearIndex = years.findIndex((item) => item.id === year);
+      if (matchingYearIndex === -1) {
+        years.push({ id: year, slugs: [], totalWords: 0 });
+      }
+    });
 
-    // agencies.map((agency) => {
-    //   agencyCount += 1;
-    //   // examples to check
-    //   // title 1, chapter 3: Administrative Conference of the United States - 12.36k words
-    //   // title 1, chapter IV, part 425: President's Commission on White House Fellowships - 1.43k words
-    //   // TODO querying on chapter doesn't appear to be working!
+    years.sort((a, b) => a.id - b.id);
 
-    //   agency.cfr_references.map((reference) => {
-    //     let countQueryArguments = "?date=2025-02-01&";
-    //     Object.keys(reference).map((key) => {
-    //       const value = reference[key as keyof cfr_reference];
-    //       countQueryArguments += `${key}=${value}&`;
-    //     });
-    //     countQueryArguments = countQueryArguments.substring(
-    //       0,
-    //       countQueryArguments.length - 1
-    //     );
-    //     if (agencyCount <= totalAgenciesToTest) {
-    //       fetch(`/count${countQueryArguments}`, {})
-    //         .then((res) => res.json())
-    //         .then((data) => {
-    //           console.log({
-    //             agency: agency.display_name,
-    //             count: data.count,
-    //             args: countQueryArguments,
-    //           });
-    //         });
-    //     }
-    //   });
-    // });
+    // Organize data into year buckets
+    analysis.map((row) => {
+      const year = row.year;
+      const matchingYearIndex = years.findIndex((item) => item.id === year);
+      const slug = {
+        slug: row.slug,
+        totalWords: row.word_count ?? 0,
+      };
+
+      const currentCount = years[matchingYearIndex].totalWords;
+      years[matchingYearIndex] = {
+        ...years[matchingYearIndex],
+        totalWords: currentCount + (row.word_count ?? 0),
+      };
+      // Look for existing slug
+      const matchingSlugIndex = years[matchingYearIndex].slugs.findIndex(
+        (item) => item.slug === row.slug
+      );
+      if (matchingSlugIndex > -1) {
+        years[matchingYearIndex].slugs[matchingSlugIndex].totalWords +=
+          row.word_count ?? 0;
+      } else {
+        years[matchingYearIndex].slugs.push(slug);
+      }
+    });
+
+    console.log(years);
   }, [agencies, analysis]);
 
   return (

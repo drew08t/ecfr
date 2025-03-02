@@ -1,9 +1,7 @@
 import sqlite3
-from datetime import datetime
 
 from api import get_agencies, get_title, get_title_json
-from const import dbName, yearMin, yearMax
-from utils import flatten_json
+from const import dbName, yearMin, yearMax, recentDate
 import json
 import os
 
@@ -17,7 +15,8 @@ def download_data():
         # Create Agency table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS agency (
-                slug TEXT PRIMARY KEY,
+                slug TEXT,
+                instance INTEGER,
                 display_name TEXT,
                 name TEXT,
                 short_name TEXT,
@@ -26,7 +25,8 @@ def download_data():
                 SUBTITLE TEXT,
                 CHAPTER TEXT,
                 SUBCHAP TEXT,
-                PART TEXT
+                PART TEXT,
+                PRIMARY KEY (slug, instance)
             )
         ''')
 
@@ -34,9 +34,10 @@ def download_data():
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS analysis (
                 slug TEXT,
+                instance, INTEGER,
                 year INTEGER,
                 word_count INTEGER,
-                PRIMARY KEY (slug, year)
+                PRIMARY KEY (slug, instance, year)
             )
         ''')
 
@@ -45,17 +46,19 @@ def download_data():
         uniqueTitles = []
 
         if isinstance(agencies, dict):  # Check if it's a dictionary
-            for agencyO in agencies['agencies']:
-                agency = flatten_json(agencyO)
-                # collect unique list of titles along the way
-                title = agency.get('title',None)
-                if title is not None and title not in uniqueTitles:
-                    uniqueTitles.append(title)
-                insertString = "INSERT or IGNORE INTO agency (slug, display_name, name, short_name, TITLE, SUBTITLE, CHAPTER, SUBCHAP, PART, sortable_name) VALUES (?,?,?,?,?,?,?,?,?,?)"
-                cursor.execute(insertString, (agency.get('slug',None),agency.get('display_name',None),agency.get('name',None),agency.get('short_name',None),agency.get('title',None),agency.get('subtitle',None),agency.get('chapter',None),agency.get('subchapter',None),agency.get('part',None),agency.get('sortable_name',None)))
-                for year in range(yearMin, yearMax + 1):   
-                    insertAnalysisString = "INSERT or IGNORE INTO analysis (slug, year) VALUES (?,?)"
-                    cursor.execute(insertAnalysisString, (agency.get('slug',None), year))
+            for agency in agencies['agencies']:
+                i = 0
+                for instance in agency.get('cfr_references'):
+                    i += 1
+                    # collect unique list of titles along the way
+                    title = instance.get('title',None)
+                    if title is not None and title not in uniqueTitles:
+                        uniqueTitles.append(title)
+                    insertString = "INSERT or IGNORE INTO agency (slug, instance, display_name, name, short_name, TITLE, SUBTITLE, CHAPTER, SUBCHAP, PART, sortable_name) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+                    cursor.execute(insertString, (agency.get('slug',None),i,agency.get('display_name',None),agency.get('name',None),agency.get('short_name',None),instance.get('title',None),instance.get('subtitle',None),instance.get('chapter',None),instance.get('subchapter',None),instance.get('part',None),agency.get('sortable_name',None)))
+                    for year in range(yearMin, yearMax + 1):   
+                        insertAnalysisString = "INSERT or IGNORE INTO analysis (slug, instance, year) VALUES (?,?,?)"
+                        cursor.execute(insertAnalysisString, (agency.get('slug',None), i, year))
 
         conn.commit()
 
@@ -96,6 +99,20 @@ def download_data():
                     if (titleResponseJSON is not None):
                         with open(filenameJSON, "w") as file:
                             json.dump(titleResponseJSON, file)
+
+        # Try to add recent data
+        for title in uniqueTitles:
+            date = recentDate
+            path = fullPath
+            filenameXML = f'{path}/cache/{date}_{title}'
+            # Check if file exists in this case instead of calling the API
+            if os.path.exists(filenameXML):
+                print(f'{filenameXML} exists - not re-downloading!')
+            else:
+                titleResponse = get_title(date, title)
+                if (titleResponse is not None):
+                    with open(filenameXML, "w") as file:
+                        file.write(titleResponse.decode())
 
     except sqlite3.Error as e:
         print(f"An error occurred: {e}")

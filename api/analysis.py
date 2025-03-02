@@ -1,7 +1,8 @@
+import os
 import sqlite3
 from api import get_agencies_db
 from utils import count_words_in_xml, parse_xml_by_nested_attributes
-from const import yearMin, yearMax, dbName
+from const import yearMin, yearMax, dbName, recentDate
 
 
 def analysis():
@@ -23,6 +24,7 @@ def analysis():
         for agency in agencies:
             title = agency.get(mainIdentifier)
             slug = agency.get('slug')
+            instance = agency.get('instance')
             searchAttributes = []
             for id in subIdentifiers:
                 agencyID = agency.get(id)
@@ -31,9 +33,22 @@ def analysis():
             for year in range(yearMin, yearMax + 1):   
                 print(title, searchAttributes)
                 try:
-                    wordCount = count_words_in_xml(parse_xml_by_nested_attributes(f'./cache/{year}-12-31_{title}',searchAttributes,None,True))
-                    insertAnalysisString = "INSERT or REPLACE INTO analysis (slug, year, word_count) VALUES (?,?,?)"
-                    cursor.execute(insertAnalysisString, (slug, year, wordCount))
+                    filename = f'./cache/{year}-12-31_{title}'
+                    if not os.path.exists(filename):
+                        newYear = year
+                        foundOne = False
+                        while newYear > yearMin and foundOne == False:
+                            newYear -= 1
+                            filename = f'./cache/{newYear}-12-31_{title}'
+                            if os.path.exists(filename):
+                                print(filename)
+                                foundOne = True
+                        if not foundOne:
+                            filename = f'./cache/{recentDate}_{title}'
+                            print(filename)
+                    wordCount = count_words_in_xml(parse_xml_by_nested_attributes(filename,searchAttributes,None,True))
+                    insertAnalysisString = "INSERT or REPLACE INTO analysis (slug, instance, year, word_count) VALUES (?,?,?,?)"
+                    cursor.execute(insertAnalysisString, (slug, instance, year, wordCount))
                 except Exception as e:
                     print(e)
             conn.commit()

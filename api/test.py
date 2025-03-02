@@ -10,6 +10,7 @@ from utils import count_words_in_xml, parse_xml_by_div_raw_xml, parse_xml_by_nes
     # title 5, subtitle A, chapter LIII: Special Education and Rehabilitative Services, Office of
     # title 41, subtitle D, chapter 201: Federal Acquisition Security Council - 5.62k
     # title 22, chapter XIV, subchapter D: Foreign Service Impasse Disputes Panel - 8.65k TODO does not match?
+    # title 48, chapter 15, EPA - 12.18M
 
 
 search = {'TYPE': 'CHAPTER', 'N': 'IV', 'TYPE': 'PART', 'N': '425' }
@@ -35,3 +36,19 @@ print(count_words_in_xml(parse_xml_by_nested_attributes('./cache/2024-12-31_41',
 
 searchAttributes = [{'TYPE': 'CHAPTER', 'N': 'XIV' },{'TYPE': 'SUBCHAP', 'N': 'D'}]
 print(count_words_in_xml(parse_xml_by_nested_attributes('./cache/2024-12-31_22',searchAttributes,None,True)))
+
+
+# ./cache/2020-12-31_48
+# stat: path should be string, bytes, os.PathLike or integer, not NoneType
+# 48 [{'TYPE': 'SUBTITLE', 'N': 'A'}, {'TYPE': 'CHAPTER', 'N': '10'}, {'TYPE': 'SUBCHAP', 'N': 'A'}]
+
+
+searchAttributes = [{'TYPE': 'CHAPTER', 'N': '10'}, {'TYPE': 'SUBCHAP', 'N': 'A'}]
+print(count_words_in_xml(parse_xml_by_nested_attributes('./cache/2020-12-31_48',searchAttributes,None,True)))
+
+searchAttributes = [{'TYPE': 'CHAPTER', 'N': '15'}]
+filenameTest = './test'
+with open(filenameTest, "w") as file:
+    data = parse_xml_by_nested_attributes('./cache/2023-12-31_48',searchAttributes,None,True)
+    file.write(data)
+print(count_words_in_xml(parse_xml_by_nested_attributes('./cache/2023-12-31_48',searchAttributes,None,True)))
