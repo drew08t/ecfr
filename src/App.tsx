@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { agency, analysis, year } from "./types";
+import { agency, analysis, year, chartData } from "./types";
+import StackedBarChart from "./components/Plot";
 
 function App() {
-  const [currentTime, setCurrentTime] = useState(0);
   const [agencies, setAgencies] = useState<agency[]>([]);
   const [analysis, setAnalysis] = useState<analysis[]>([]);
+  const [plotYears, setPlotYears] = useState<string[]>([]);
+  const [plotData, setPlotData] = useState<chartData[]>([]);
+
   useEffect(() => {
-    fetch("/time")
-      .then((res) => res.json())
-      .then((data) => {
-        setCurrentTime(data.time);
-      });
     fetch("/agencies-unique")
       .then((res) => res.json())
       .then((data) => {
@@ -26,6 +24,8 @@ function App() {
 
   useEffect(() => {
     const years: year[] = [];
+    const uniqueSlugs: string[] = [];
+    const yearStrings: string[] = [];
     // Pre-populate years
     analysis.map((row) => {
       const year = row.year;
@@ -36,13 +36,20 @@ function App() {
     });
 
     years.sort((a, b) => a.id - b.id);
+    years.map((year) => {
+      yearStrings.push(year.id.toString());
+    });
 
     // Organize data into year buckets
     analysis.map((row) => {
       const year = row.year;
       const matchingYearIndex = years.findIndex((item) => item.id === year);
+      const slugName = row.slug;
+      if (!uniqueSlugs.includes(slugName)) {
+        uniqueSlugs.push(slugName);
+      }
       const slug = {
-        slug: row.slug,
+        slug: slugName,
         totalWords: row.word_count ?? 0,
       };
 
@@ -63,19 +70,27 @@ function App() {
       }
     });
 
-    // Sort each slug
-    years.map((year) => {
-      year.slugs = year.slugs.sort((a, b) => a.totalWords - b.totalWords);
+    // Transform data to fit plot structure
+    const chartData: chartData[] = [];
+    uniqueSlugs.map((slug) => {
+      const values = yearStrings.map((year) => {
+        const yearData = years.find((obj) => obj.id.toString() === year);
+        const slugValue = yearData?.slugs.find((s) => s.slug === slug);
+        return slugValue?.totalWords ?? 0;
+      });
+      chartData.push({ name: slug, values });
     });
-
-    console.log(years);
+    setPlotYears(yearStrings);
+    setPlotData(chartData);
   }, [agencies, analysis]);
 
   return (
     <div className="App">
-      <header className="App-header">
-        <p>The current time is {currentTime}.</p>
-      </header>
+      <StackedBarChart
+        years={plotYears}
+        data={plotData}
+        title="My Custom Data"
+      />
     </div>
   );
 }

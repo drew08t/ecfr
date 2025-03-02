@@ -28,3 +28,8 @@ export interface slug {
   slug: string;
   totalWords: number;
 }
+
+export interface chartData {
+  name: string;
+  values: number[];
+}
