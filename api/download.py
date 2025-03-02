@@ -59,6 +59,18 @@ def download_data():
                     for year in range(yearMin, yearMax + 1):   
                         insertAnalysisString = "INSERT or IGNORE INTO analysis (slug, instance, year) VALUES (?,?,?)"
                         cursor.execute(insertAnalysisString, (agency.get('slug',None), i, year))
+                for child in agency.get('children'):
+                    for instance in child.get('cfr_references'):
+                        i += 1
+                        # collect unique list of titles along the way
+                        title = instance.get('title',None)
+                        if title is not None and title not in uniqueTitles:
+                            uniqueTitles.append(title)
+                        insertString = "INSERT or IGNORE INTO agency (slug, instance, display_name, name, short_name, TITLE, SUBTITLE, CHAPTER, SUBCHAP, PART, sortable_name) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+                        cursor.execute(insertString, (agency.get('slug',None),i,agency.get('display_name',None),agency.get('name',None),agency.get('short_name',None),instance.get('title',None),instance.get('subtitle',None),instance.get('chapter',None),instance.get('subchapter',None),instance.get('part',None),agency.get('sortable_name',None)))
+                        for year in range(yearMin, yearMax + 1):   
+                            insertAnalysisString = "INSERT or IGNORE INTO analysis (slug, instance, year) VALUES (?,?,?)"
+                            cursor.execute(insertAnalysisString, (agency.get('slug',None), i, year))
 
         conn.commit()
 
