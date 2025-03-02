@@ -1,19 +1,23 @@
 import React from "react";
 import Plot from "react-plotly.js";
-import { Data, Layout } from "plotly.js";
+import { Layout } from "plotly.js";
 
-// Define the interface for individual category data
 interface CategoryData {
   name: string;
   values: number[];
-  color?: string; // Optional color property
 }
 
-// Define props interface
 interface StackedBarChartProps {
   years: string[];
   data: CategoryData[];
-  title?: string; // Optional title
+  title?: string;
+}
+
+interface BarChartData {
+  x: string[];
+  y: number[];
+  name: string;
+  type: "bar";
 }
 
 const StackedBarChart: React.FC<StackedBarChartProps> = ({
@@ -21,17 +25,43 @@ const StackedBarChart: React.FC<StackedBarChartProps> = ({
   data,
   title = "Yearly Data by Category",
 }) => {
-  // Transform the input data into Plotly format
-  const plotData: Data[] = data.map((category, index) => ({
-    x: years,
-    y: category.values,
-    name: category.name,
-    type: "bar" as const,
-    marker: {
-      // Use provided color or fallback to a default palette
-      color: category.color || getDefaultColor(index),
-    },
-  }));
+  const getSortedPlotData = (): BarChartData[] => {
+    const yearData: { value: number; name: string }[][] = years.map(() => []);
+
+    data.forEach((category) => {
+      category.values.forEach((value, yearIndex) => {
+        yearData[yearIndex].push({
+          value,
+          name: category.name,
+        });
+      });
+    });
+
+    yearData.forEach((year) => {
+      year.sort((a, b) => b.value - a.value);
+    });
+
+    const sortedDataMap: { [key: string]: BarChartData } = {};
+
+    yearData.forEach((yearValues, yearIndex) => {
+      yearValues.forEach((item) => {
+        if (!sortedDataMap[item.name]) {
+          sortedDataMap[item.name] = {
+            x: [],
+            y: [],
+            name: item.name,
+            type: "bar",
+          };
+        }
+        sortedDataMap[item.name].x.push(years[yearIndex]);
+        sortedDataMap[item.name].y.push(item.value);
+      });
+    });
+
+    return Object.values(sortedDataMap);
+  };
+
+  const plotData: BarChartData[] = getSortedPlotData();
 
   const layout: Partial<Layout> = {
     barmode: "stack",
@@ -46,6 +76,7 @@ const StackedBarChart: React.FC<StackedBarChartProps> = ({
       x: 1,
       y: 1,
     },
+    autosize: true,
   };
 
   const config: Partial<Plotly.Config> = {
@@ -62,18 +93,6 @@ const StackedBarChart: React.FC<StackedBarChartProps> = ({
       />
     </div>
   );
-};
-
-// Helper function for default colors
-const getDefaultColor = (index: number): string => {
-  const colors = [
-    "#1f77b4", // blue
-    "#ff7f0e", // orange
-    "#2ca02c", // green
-    "#d62728", // red
-    "#9467bd", // purple
-  ];
-  return colors[index % colors.length];
 };
 
 export default StackedBarChart;
