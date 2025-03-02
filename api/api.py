@@ -27,7 +27,7 @@ def get_current_time():
     return {'time': time.time()}
 
 @app.route('/agencies-unique')
-def get_agencies_db():
+def get_agencies_db_unique():
     try:
         conn = sqlite3.connect(dbName)
         cursor = conn.cursor()

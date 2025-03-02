@@ -74,18 +74,7 @@ def download_data():
 
         conn.commit()
 
-        # # Create Title table
-        # cursor.execute('''
-        #     CREATE TABLE IF NOT EXISTS title (
-        #         title INTEGER,
-        #         date TEXT,
-        #         raw TEXT,
-        #         PRIMARY KEY (title, date)
-        #     )
-        # ''')
-
-        # Populate Title table
-        # Use cache of files instead - better for storage
+        # Use cache of files - better for storage
         # Make sure missing queries aren't just timing out
         uniqueTitles.sort()
         for year in range(yearMin, yearMax + 1):
